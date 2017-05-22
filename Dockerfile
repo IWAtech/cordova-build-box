@@ -9,8 +9,12 @@ ENV PATH="$GRADLE_HOME:${PATH}"
 ENV CI=1
 ENV CORDOVA_ANDROID_GRADLE_DISTRIBUTION_URL="file:///tmp/Gradle/gradle-${GRADLE_VERSION}-all.zip"
 ENV ORG_GRADLE_PROJECT_cdvBuildToolsVersion=25
+ENV GRADLE_OPTS="-Dorg.gradle.daemon=false"
+ENV GRADLE_HOME="/tmp/.gradle"
 
-RUN mkdir Gradle && cd Gradle && \
+ADD .gradle/ /tmp/
+
+RUN jps && mkdir Gradle && cd Gradle && \
 	wget -q https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-all.zip && \
 	mkdir /opt/gradle && \
 	unzip -q -d /opt/gradle gradle-${GRADLE_VERSION}-all.zip && \
@@ -23,6 +27,7 @@ RUN npm install --quiet -g cordova && \
 	cordova platform add android && \
 	#echo $PATH && echo Gradle Home $GRADLE_HOME && \
 	cordova requirements android && \
+	cordova build android && \
 	cd .. && \
-	rm -r temp 
+	rm -r temp && gradle --stop && jps 
 
